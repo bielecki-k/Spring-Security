@@ -21,15 +21,11 @@ import java.util.List;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private AlwaysAllowFilter alwaysAllowFilter;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.antMatcher("/**")
-                .addFilterAfter(alwaysAllowFilter, BasicAuthenticationFilter.class)
                 .authorizeRequests().anyRequest()
-                .authenticated().and().formLogin();
+                .authenticated().and().httpBasic();
     }
 
     @Configuration
