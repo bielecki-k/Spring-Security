@@ -3,6 +3,7 @@ package com.bielecki.Spring.Security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,13 +20,36 @@ import javax.servlet.Filter;
 import java.util.List;
 
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig  {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/**")
-                .authorizeRequests().anyRequest()
-                .authenticated().and().httpBasic();
+    @Order(0)
+    @Configuration
+    public static class HttpBasicConfig extends WebSecurityConfigurerAdapter{
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.antMatcher("/secured-basic").authorizeRequests()
+                    .anyRequest().authenticated()
+                    .and().httpBasic()
+                    .and().csrf().disable();
+        }
+    }
+
+    @Order(1)
+    @Configuration
+    public static class FormLoginConfig extends WebSecurityConfigurerAdapter{
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.antMatcher("/secured-form/**")
+                    .authorizeRequests()
+                    .antMatchers("/secured-form/login")
+                    .permitAll()
+                    .anyRequest().authenticated()   //to this step - all requests to /secured-form/
+                                                    // without /secured-form/login
+                                                    // must be authorized
+                    .and().formLogin().loginPage("/secured-form/login")
+                    .loginProcessingUrl("/secured-form/login")
+                    .and().csrf().disable();
+        }
     }
 
     @Configuration
